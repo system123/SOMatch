@@ -1,0 +1,4 @@
+results/
+results_semisupervised/
+data/
+*.tar

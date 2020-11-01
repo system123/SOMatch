@@ -1,0 +1,173 @@
+{
+    "name": "backbone_asl1_wml",
+    "desc": "Hypercol matching network",
+    "result_dir": "results/",
+    "device": "cuda",
+    "device_ids": [0],
+    "epochs": 50,
+    "nsave": 8,
+    "resume_from": -1,
+    "overwrite": true,
+    "save_freq": 1,
+    "log_freq": 100,
+    "verbosity": 0,
+    "seed": 999,
+    "logger": {
+        "TensorboardLogger": {
+            "log_every": 1,
+            "log_params": false,
+            "log_grads": false,
+            "log_images": true
+        }
+    },
+    "trainer": "WURHypercolTrainer",
+    "trainer_config": {
+        "search_domain": "A",
+        "fp16": false,
+        "loss_weights": {
+            "match": 1,
+            "spatial_softmax": 1e-4,
+            "heatmap_l1": 1e-7
+        }
+    },
+    "loss": {
+        "Lmatch": ["mse_loss_weighted"]
+    },
+    "datasets": {
+        "train": {
+            "type": "UrbanAtlasDatasetSiameseTriplet",
+            "base_dir": "data",
+            "cities": [
+                "StaraZagora",
+                "Marseille",
+                "Faro",
+                "Bristol",
+                "Rzeszow",
+                "Heraklion",
+                "Wirral",
+                "Lisbon",
+                "LeHavre",
+                "Athen",
+                "Aveiro",
+                "Braga"
+            ],
+            "batch_size": 16,
+            "cache_dir": "cache/train",
+            "cache_size": 50000,
+            "shuffle": true,
+            "augment": true,
+            "workers": 4,
+            "normalize": {},
+            "crop_a": 256,
+            "crop_b": 128,
+            "noise": false,
+            "perc_supervised": 100,
+            "single_domain": false,
+            "stretch_contrast": true
+        },
+        "validation": {
+            "type": "UrbanAtlasDatasetSiameseTriplet",
+            "base_dir": "data",
+            "cities": ["Exeter", "Lincoln", "Kalisz"],
+            "batch_size": 16,
+            "cache_dir": "cache/validation",
+            "cache_size": 10000,
+            "shuffle": false,
+            "augment": false,
+            "workers": 4,
+            "normalize": {},
+            "crop_a": 256,
+            "crop_b": 128,
+            "noise": false,
+            "perc_supervised": 100,
+            "single_domain": false,
+            "stretch_contrast": true
+        },
+        "test": {
+            "type": "UrbanAtlasDatasetSiameseTriplet",
+            "base_dir": "data",
+            "cities": [
+                "Varna",
+                "Sofia",
+                "Valetta",
+                "Kattowitz",
+                "Portsmouth",
+                "London",
+                "Leeds",
+                "Volos"
+            ],
+            "batch_size": 32,
+            "cache_dir": "cache/test",
+            "cache_size": 10000,
+            "shuffle": false,
+            "augment": false,
+            "workers": 4,
+            "normalize": {},
+            "crop_a": 256,
+            "crop_b": 128,
+            "noise": false,
+            "perc_supervised": 100,
+            "stretch_contrast": true
+        }
+    },
+    "optimizer": {
+        "Fts": {
+            "models": ["FtsA", "FtsB"],
+            "Adam": {
+                "lr": 1e-4,
+                "betas": [0.9, 0.999],
+                "weight_decay": 0
+            }
+        }
+    },
+    "_scheduler": {
+        "AE_A": {
+            "smith_1cycle": {
+                "scheme": "batch",
+                "max_lr": 2e-4,
+                "min_lr": 2e-5,
+                "anneal_div": 1,
+                "total_iter": 20000
+            }
+        },
+        "AE_B": {
+            "smith_1cycle": {
+                "scheme": "batch",
+                "max_lr": 2e-4,
+                "min_lr": 2e-5,
+                "anneal_div": 1,
+                "total_iter": 20000
+            }
+        }
+    },
+    "_monitor": {
+        "score": "loss",
+        "scale": -1,
+        "early_stopping": true,
+        "patience": 30,
+        "save_score": "loss",
+        "save_scale": -1
+    },
+    "model": {
+        "FtsA": {
+            "CorrelationFeatureNet": {
+                "column_depth": 256,
+                "normalize": true,
+                "no_relu": true,
+                "attention": true,
+                "return_attn": false,
+                "attn_act": "tanh"
+            }
+        }, 
+        "FtsB": {
+            "CorrelationFeatureNet": {
+                "column_depth": 256,
+                "normalize": true,
+                "no_relu": true,
+                "attention": true,
+                "return_attn": false,
+                "attn_act": "tanh"
+            }
+        }
+    }
+}

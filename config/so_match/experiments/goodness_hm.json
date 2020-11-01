@@ -1,0 +1,107 @@
+{
+    "name": "goodness_hm",
+    "desc": "Hypercol matching network",
+    "result_dir": "results/",
+    "device": "cuda",
+    "device_ids": [0],
+    "epochs": 500,
+    "nsave": 8,
+    "resume_from": -1,
+    "overwrite": true,
+    "save_freq": 1,
+    "log_freq": 100,
+    "verbosity": 0,
+    "seed": 123,
+    "logger": {
+        "TensorboardLogger": {
+            "log_every": 1,
+            "log_params": false,
+            "log_grads": false,
+            "log_images": true
+        }
+    },
+    "trainer": "DefaultTrainer",
+    "trainer_config": {
+    },
+    "loss": {
+        "Loss": ["binary_cross_entropy_with_logits"]
+    },
+    "datasets": {
+        "train": {
+            "type": "CSVUADataset",
+            "base_dir": "data",
+            "csv": "checkpoint_50_extracted_dset_train.csv",
+            "domain": "hm",
+            "balance": true,
+            "thresh_loss": [2, 1.2],
+            "thresh_l2": [1, 2.5],
+            "batch_size": 64,
+            "shuffle": true,
+            "augment": true,
+            "workers": 4
+        },
+        "validation": {
+            "type": "CSVUADataset",
+            "base_dir": "data",
+            "csv": "checkpoint_50_extracted_dset_validation.csv",
+            "domain": "hm",
+            "balance": true,
+            "thresh_loss": [2, 1.2],
+            "thresh_l2": [1, 2.5],
+            "batch_size": 64,
+            "shuffle": false,
+            "augment": false,
+            "workers": 1
+        },
+        "test": {
+            "type": "CSVUADataset",
+            "base_dir": "data",
+            "csv": "checkpoint_50_extracted_dset_test.csv",
+            "domain": "hm",
+            "balance": true,
+            "thresh_loss": [2, 1.2],
+            "thresh_l2": [1, 2.5],
+            "batch_size": 64,
+            "shuffle": false,
+            "augment": false,
+            "workers": 1
+        }
+    },
+    "optimizer": {
+        "Optim": {
+            "models": ["Model"],
+            "Adam": {
+                "lr": 0.0001,
+                "betas": [0.9, 0.999],
+                "weight_decay": 1e-6
+            }
+        }
+    },
+    "_scheduler": {
+        "Optim": {
+            "smith_1cycle": {
+                "scheme": "batch",
+                "max_lr": 1e-4,
+                "min_lr": 5e-6,
+                "anneal_div": 1,
+                "total_iter": 20000
+            }
+        }
+    },
+    "_monitor": {
+        "score": "loss",
+        "scale": -1,
+        "early_stopping": true,
+        "patience": 30,
+        "save_score": "loss",
+        "save_scale": -1
+    },
+    "model": {
+        "Model": {
+            "ORN": {
+                "classes": 1,
+                "padding": false
+            }
+        }
+    }
+}

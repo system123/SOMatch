@@ -1,0 +1,4 @@
+FROM tensorflow/tensorflow
+RUN mkdir /runs
+WORKDIR "/runs"
+CMD ["tensorboard", "--logdir=/runs"]
